@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ExamRoomListMapper">
+    
+    <resultMap type="ExamRoomList" id="ExamRoomListResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="capacity"    column="capacity"    />
+    </resultMap>
+
+    <sql id="selectExamRoomListVo">
+        select id, name, capacity from exam_room_list
+    </sql>
+
+    <select id="selectExamRoomListList" parameterType="ExamRoomList" resultMap="ExamRoomListResult">
+        <include refid="selectExamRoomListVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="capacity != null "> and capacity = #{capacity}</if>
+        </where>
+    </select>
+    
+    <select id="selectExamRoomListById" parameterType="Long" resultMap="ExamRoomListResult">
+        <include refid="selectExamRoomListVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertExamRoomList" parameterType="ExamRoomList" useGeneratedKeys="true" keyProperty="id">
+        insert into exam_room_list
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="capacity != null">capacity,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="capacity != null">#{capacity},</if>
+         </trim>
+    </insert>
+
+    <update id="updateExamRoomList" parameterType="ExamRoomList">
+        update exam_room_list
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="capacity != null">capacity = #{capacity},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteExamRoomListById" parameterType="Long">
+        delete from exam_room_list where id = #{id}
+    </delete>
+
+    <delete id="deleteExamRoomListByIds" parameterType="String">
+        delete from exam_room_list where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
