@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ClassListMapper">
+    
+    <resultMap type="ClassList" id="ClassListResult">
+        <result property="name"    column="name"    />
+        <result property="number"    column="number"    />
+    </resultMap>
+
+    <sql id="selectClassListVo">
+        select name, number from class_list
+    </sql>
+
+    <select id="selectClassListList" parameterType="ClassList" resultMap="ClassListResult">
+        <include refid="selectClassListVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="number != null "> and number = #{number}</if>
+        </where>
+    </select>
+    
+    <select id="selectClassListByName" parameterType="String" resultMap="ClassListResult">
+        <include refid="selectClassListVo"/>
+        where name = #{name}
+    </select>
+
+    <insert id="insertClassList" parameterType="ClassList">
+        insert into class_list
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="number != null">number,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="number != null">#{number},</if>
+         </trim>
+    </insert>
+
+    <update id="updateClassList" parameterType="ClassList">
+        update class_list
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="number != null">number = #{number},</if>
+        </trim>
+        where name = #{name}
+    </update>
+
+    <delete id="deleteClassListByName" parameterType="String">
+        delete from class_list where name = #{name}
+    </delete>
+
+    <delete id="deleteClassListByNames" parameterType="String">
+        delete from class_list where name in 
+        <foreach item="name" collection="array" open="(" separator="," close=")">
+            #{name}
+        </foreach>
+    </delete>
+</mapper>

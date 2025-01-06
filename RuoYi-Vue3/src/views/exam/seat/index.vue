@@ -1,26 +1,34 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="考试名称" prop="name">
+      <el-form-item label="考场id" prop="examRoomId">
         <el-input
-          v-model="queryParams.name"
-          placeholder="请输入考试名称"
+          v-model="queryParams.examRoomId"
+          placeholder="请输入考场id"
           clearable
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="考试时间" prop="time">
-        <el-date-picker clearable
-          v-model="queryParams.time"
-          type="datetime"
-          value-format="YYYY-MM-DD"
-          placeholder="请选择考试时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="考试时长" prop="duration">
+      <el-form-item label="座位号" prop="seatNumber">
         <el-input
-          v-model="queryParams.duration"
-          placeholder="请输入考试时长"
+          v-model="queryParams.seatNumber"
+          placeholder="请输入座位号"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="学生id" prop="studentId">
+        <el-input
+          v-model="queryParams.studentId"
+          placeholder="请输入学生id"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="考试id" prop="examId">
+        <el-input
+          v-model="queryParams.examId"
+          placeholder="请输入考试id"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -38,7 +46,7 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['exam:examlist:add']"
+          v-hasPermi="['exam:seat:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -48,7 +56,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['exam:examlist:edit']"
+          v-hasPermi="['exam:seat:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -58,7 +66,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['exam:examlist:remove']"
+          v-hasPermi="['exam:seat:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -67,26 +75,23 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['exam:examlist:export']"
+          v-hasPermi="['exam:seat:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="examlistList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="seatList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="考试id" width="100" align="center" prop="id" />
-      <el-table-column label="考试名称" align="center" prop="name" />
-      <el-table-column label="考试时间" align="center" prop="time" width="180">
-        <template #default="scope">
-          <span>{{ scope.row.time }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="考试时长" align="center" prop="duration" />
+      <el-table-column label="座位唯一id" align="center" prop="id" />
+      <el-table-column label="考场id" align="center" prop="examRoomId" />
+      <el-table-column label="座位号" align="center" prop="seatNumber" />
+      <el-table-column label="学生id" align="center" prop="studentId" />
+      <el-table-column label="考试id" align="center" prop="examId" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['exam:examlist:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['exam:examlist:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['exam:seat:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['exam:seat:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -99,22 +104,20 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改考试科目列表对话框 -->
+    <!-- 添加或修改考场座位对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="examlistRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="考试名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入考试名称" />
+      <el-form ref="seatRef" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="考场id" prop="examRoomId">
+          <el-input v-model="form.examRoomId" placeholder="请输入考场id" />
         </el-form-item>
-        <el-form-item label="考试时间" prop="time">
-          <el-date-picker clearable
-            v-model="form.time"
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="请选择考试时间">
-          </el-date-picker>
+        <el-form-item label="座位号" prop="seatNumber">
+          <el-input v-model="form.seatNumber" placeholder="请输入座位号" />
         </el-form-item>
-        <el-form-item label="考试时长" prop="duration">
-          <el-input v-model="form.duration" placeholder="请输入考试时长" />
+        <el-form-item label="学生id" prop="studentId">
+          <el-input v-model="form.studentId" placeholder="请输入学生id" />
+        </el-form-item>
+        <el-form-item label="考试id" prop="examId">
+          <el-input v-model="form.examId" placeholder="请输入考试id" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -127,12 +130,12 @@
   </div>
 </template>
 
-<script setup name="Examlist">
-import { listExamlist, getExamlist, delExamlist, addExamlist, updateExamlist } from "@/api/exam/examlist";
+<script setup name="Seat">
+import { listSeat, getSeat, delSeat, addSeat, updateSeat } from "@/api/exam/seat";
 
 const { proxy } = getCurrentInstance();
 
-const examlistList = ref([]);
+const seatList = ref([]);
 const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
@@ -147,30 +150,34 @@ const data = reactive({
   queryParams: {
     pageNum: 1,
     pageSize: 10,
-    name: null,
-    time: null,
-    duration: null
+    examRoomId: null,
+    seatNumber: null,
+    studentId: null,
+    examId: null
   },
   rules: {
-    name: [
-      { required: true, message: "考试名称不能为空", trigger: "blur" }
+    examRoomId: [
+      { required: true, message: "考场id不能为空", trigger: "blur" }
     ],
-    time: [
-      { required: true, message: "考试时间不能为空", trigger: "blur" }
+    seatNumber: [
+      { required: true, message: "座位号不能为空", trigger: "blur" }
     ],
-    duration: [
-      { required: true, message: "考试时长不能为空", trigger: "blur" }
+    studentId: [
+      { required: true, message: "学生id不能为空", trigger: "blur" }
+    ],
+    examId: [
+      { required: true, message: "考试id不能为空", trigger: "blur" }
     ]
   }
 });
 
 const { queryParams, form, rules } = toRefs(data);
 
-/** 查询考试科目列表列表 */
+/** 查询考场座位列表 */
 function getList() {
   loading.value = true;
-  listExamlist(queryParams.value).then(response => {
-    examlistList.value = response.rows;
+  listSeat(queryParams.value).then(response => {
+    seatList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
@@ -186,11 +193,12 @@ function cancel() {
 function reset() {
   form.value = {
     id: null,
-    name: null,
-    time: null,
-    duration: null
+    examRoomId: null,
+    seatNumber: null,
+    studentId: null,
+    examId: null
   };
-  proxy.resetForm("examlistRef");
+  proxy.resetForm("seatRef");
 }
 
 /** 搜索按钮操作 */
@@ -216,32 +224,32 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加考试科目列表";
+  title.value = "添加考场座位";
 }
 
 /** 修改按钮操作 */
 function handleUpdate(row) {
   reset();
   const _id = row.id || ids.value
-  getExamlist(_id).then(response => {
+  getSeat(_id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改考试科目列表";
+    title.value = "修改考场座位";
   });
 }
 
 /** 提交按钮 */
 function submitForm() {
-  proxy.$refs["examlistRef"].validate(valid => {
+  proxy.$refs["seatRef"].validate(valid => {
     if (valid) {
       if (form.value.id != null) {
-        updateExamlist(form.value).then(response => {
+        updateSeat(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
           getList();
         });
       } else {
-        addExamlist(form.value).then(response => {
+        addSeat(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
           getList();
@@ -254,8 +262,8 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除考试科目列表编号为"' + _ids + '"的数据项？').then(function() {
-    return delExamlist(_ids);
+  proxy.$modal.confirm('是否确认删除考场座位编号为"' + _ids + '"的数据项？').then(function() {
+    return delSeat(_ids);
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
@@ -264,9 +272,9 @@ function handleDelete(row) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('exam/examlist/export', {
+  proxy.download('exam/seat/export', {
     ...queryParams.value
-  }, `examlist_${new Date().getTime()}.xlsx`)
+  }, `seat_${new Date().getTime()}.xlsx`)
 }
 
 getList();

@@ -23,7 +23,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 
 /**
  * 考试科目列表Controller
- * 
+ *
  * @author ruoyi
  * @date 2025-01-06
  */
@@ -43,6 +43,7 @@ public class ExamListController extends BaseController
     {
         startPage();
         List<ExamList> list = examListService.selectExamListList(examList);
+        System.out.println(list.toString());
         return getDataTable(list);
     }
 

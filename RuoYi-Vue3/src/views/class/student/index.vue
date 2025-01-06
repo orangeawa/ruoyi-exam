@@ -1,26 +1,18 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="考试名称" prop="name">
+      <el-form-item label="学生姓名" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入考试名称"
+          placeholder="请输入学生姓名"
           clearable
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="考试时间" prop="time">
-        <el-date-picker clearable
-          v-model="queryParams.time"
-          type="datetime"
-          value-format="YYYY-MM-DD"
-          placeholder="请选择考试时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="考试时长" prop="duration">
+      <el-form-item label="班级代码" prop="className">
         <el-input
-          v-model="queryParams.duration"
-          placeholder="请输入考试时长"
+          v-model="queryParams.className"
+          placeholder="请输入班级代码"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -38,7 +30,7 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['exam:examlist:add']"
+          v-hasPermi="['class:student:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -48,7 +40,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['exam:examlist:edit']"
+          v-hasPermi="['class:student:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -58,7 +50,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['exam:examlist:remove']"
+          v-hasPermi="['class:student:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -67,26 +59,21 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['exam:examlist:export']"
+          v-hasPermi="['class:student:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="examlistList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="studentList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="考试id" width="100" align="center" prop="id" />
-      <el-table-column label="考试名称" align="center" prop="name" />
-      <el-table-column label="考试时间" align="center" prop="time" width="180">
-        <template #default="scope">
-          <span>{{ scope.row.time }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="考试时长" align="center" prop="duration" />
+      <el-table-column label="学生唯一id" align="center" prop="id" />
+      <el-table-column label="学生姓名" align="center" prop="name" />
+      <el-table-column label="班级代码" align="center" prop="className" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['exam:examlist:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['exam:examlist:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['class:student:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['class:student:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -99,22 +86,14 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改考试科目列表对话框 -->
+    <!-- 添加或修改学生列表对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="examlistRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="考试名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入考试名称" />
+      <el-form ref="studentRef" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="学生姓名" prop="name">
+          <el-input v-model="form.name" placeholder="请输入学生姓名" />
         </el-form-item>
-        <el-form-item label="考试时间" prop="time">
-          <el-date-picker clearable
-            v-model="form.time"
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="请选择考试时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="考试时长" prop="duration">
-          <el-input v-model="form.duration" placeholder="请输入考试时长" />
+        <el-form-item label="班级代码" prop="className">
+          <el-input v-model="form.className" placeholder="请输入班级代码" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -127,12 +106,12 @@
   </div>
 </template>
 
-<script setup name="Examlist">
-import { listExamlist, getExamlist, delExamlist, addExamlist, updateExamlist } from "@/api/exam/examlist";
+<script setup name="Student">
+import { listStudent, getStudent, delStudent, addStudent, updateStudent } from "@/api/class/student";
 
 const { proxy } = getCurrentInstance();
 
-const examlistList = ref([]);
+const studentList = ref([]);
 const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
@@ -148,29 +127,25 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     name: null,
-    time: null,
-    duration: null
+    className: null
   },
   rules: {
     name: [
-      { required: true, message: "考试名称不能为空", trigger: "blur" }
+      { required: true, message: "学生姓名不能为空", trigger: "blur" }
     ],
-    time: [
-      { required: true, message: "考试时间不能为空", trigger: "blur" }
-    ],
-    duration: [
-      { required: true, message: "考试时长不能为空", trigger: "blur" }
+    className: [
+      { required: true, message: "班级代码不能为空", trigger: "blur" }
     ]
   }
 });
 
 const { queryParams, form, rules } = toRefs(data);
 
-/** 查询考试科目列表列表 */
+/** 查询学生列表列表 */
 function getList() {
   loading.value = true;
-  listExamlist(queryParams.value).then(response => {
-    examlistList.value = response.rows;
+  listStudent(queryParams.value).then(response => {
+    studentList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
@@ -187,10 +162,9 @@ function reset() {
   form.value = {
     id: null,
     name: null,
-    time: null,
-    duration: null
+    className: null
   };
-  proxy.resetForm("examlistRef");
+  proxy.resetForm("studentRef");
 }
 
 /** 搜索按钮操作 */
@@ -216,32 +190,32 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加考试科目列表";
+  title.value = "添加学生列表";
 }
 
 /** 修改按钮操作 */
 function handleUpdate(row) {
   reset();
   const _id = row.id || ids.value
-  getExamlist(_id).then(response => {
+  getStudent(_id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改考试科目列表";
+    title.value = "修改学生列表";
   });
 }
 
 /** 提交按钮 */
 function submitForm() {
-  proxy.$refs["examlistRef"].validate(valid => {
+  proxy.$refs["studentRef"].validate(valid => {
     if (valid) {
       if (form.value.id != null) {
-        updateExamlist(form.value).then(response => {
+        updateStudent(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
           getList();
         });
       } else {
-        addExamlist(form.value).then(response => {
+        addStudent(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
           getList();
@@ -254,8 +228,8 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除考试科目列表编号为"' + _ids + '"的数据项？').then(function() {
-    return delExamlist(_ids);
+  proxy.$modal.confirm('是否确认删除学生列表编号为"' + _ids + '"的数据项？').then(function() {
+    return delStudent(_ids);
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
@@ -264,9 +238,9 @@ function handleDelete(row) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('exam/examlist/export', {
+  proxy.download('class/student/export', {
     ...queryParams.value
-  }, `examlist_${new Date().getTime()}.xlsx`)
+  }, `student_${new Date().getTime()}.xlsx`)
 }
 
 getList();

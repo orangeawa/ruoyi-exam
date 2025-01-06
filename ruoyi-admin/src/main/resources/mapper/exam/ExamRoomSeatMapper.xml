@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ExamRoomSeatMapper">
+    
+    <resultMap type="ExamRoomSeat" id="ExamRoomSeatResult">
+        <result property="id"    column="id"    />
+        <result property="examRoomId"    column="exam_room_id"    />
+        <result property="seatNumber"    column="seat_number"    />
+        <result property="studentId"    column="student_id"    />
+        <result property="examId"    column="exam_id"    />
+    </resultMap>
+
+    <sql id="selectExamRoomSeatVo">
+        select id, exam_room_id, seat_number, student_id, exam_id from exam_room_seat
+    </sql>
+
+    <select id="selectExamRoomSeatList" parameterType="ExamRoomSeat" resultMap="ExamRoomSeatResult">
+        <include refid="selectExamRoomSeatVo"/>
+        <where>  
+            <if test="examRoomId != null "> and exam_room_id = #{examRoomId}</if>
+            <if test="seatNumber != null "> and seat_number = #{seatNumber}</if>
+            <if test="studentId != null "> and student_id = #{studentId}</if>
+            <if test="examId != null "> and exam_id = #{examId}</if>
+        </where>
+    </select>
+    
+    <select id="selectExamRoomSeatById" parameterType="Long" resultMap="ExamRoomSeatResult">
+        <include refid="selectExamRoomSeatVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertExamRoomSeat" parameterType="ExamRoomSeat" useGeneratedKeys="true" keyProperty="id">
+        insert into exam_room_seat
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="examRoomId != null">exam_room_id,</if>
+            <if test="seatNumber != null">seat_number,</if>
+            <if test="studentId != null">student_id,</if>
+            <if test="examId != null">exam_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="examRoomId != null">#{examRoomId},</if>
+            <if test="seatNumber != null">#{seatNumber},</if>
+            <if test="studentId != null">#{studentId},</if>
+            <if test="examId != null">#{examId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateExamRoomSeat" parameterType="ExamRoomSeat">
+        update exam_room_seat
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="examRoomId != null">exam_room_id = #{examRoomId},</if>
+            <if test="seatNumber != null">seat_number = #{seatNumber},</if>
+            <if test="studentId != null">student_id = #{studentId},</if>
+            <if test="examId != null">exam_id = #{examId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteExamRoomSeatById" parameterType="Long">
+        delete from exam_room_seat where id = #{id}
+    </delete>
+
+    <delete id="deleteExamRoomSeatByIds" parameterType="String">
+        delete from exam_room_seat where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

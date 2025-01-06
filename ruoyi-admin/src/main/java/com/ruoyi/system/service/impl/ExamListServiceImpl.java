@@ -9,19 +9,19 @@ import com.ruoyi.system.service.IExamListService;
 
 /**
  * 考试科目列表Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2025-01-06
  */
 @Service
-public class ExamListServiceImpl implements IExamListService 
+public class ExamListServiceImpl implements IExamListService
 {
     @Autowired
     private ExamListMapper examListMapper;
 
     /**
      * 查询考试科目列表
-     * 
+     *
      * @param id 考试科目列表主键
      * @return 考试科目列表
      */
@@ -33,19 +33,21 @@ public class ExamListServiceImpl implements IExamListService
 
     /**
      * 查询考试科目列表列表
-     * 
+     *
      * @param examList 考试科目列表
      * @return 考试科目列表
      */
     @Override
     public List<ExamList> selectExamListList(ExamList examList)
     {
-        return examListMapper.selectExamListList(examList);
+        List<ExamList> list = examListMapper.selectExamListList(examList);
+        System.out.println(list.toString());
+        return list;
     }
 
     /**
      * 新增考试科目列表
-     * 
+     *
      * @param examList 考试科目列表
      * @return 结果
      */
@@ -57,7 +59,7 @@ public class ExamListServiceImpl implements IExamListService
 
     /**
      * 修改考试科目列表
-     * 
+     *
      * @param examList 考试科目列表
      * @return 结果
      */
@@ -69,7 +71,7 @@ public class ExamListServiceImpl implements IExamListService
 
     /**
      * 批量删除考试科目列表
-     * 
+     *
      * @param ids 需要删除的考试科目列表主键
      * @return 结果
      */
@@ -81,7 +83,7 @@ public class ExamListServiceImpl implements IExamListService
 
     /**
      * 删除考试科目列表信息
-     * 
+     *
      * @param id 考试科目列表主键
      * @return 结果
      */
